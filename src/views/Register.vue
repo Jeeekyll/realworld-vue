@@ -6,10 +6,15 @@
           <h1 class="text-xs-center">Sign up</h1>
           <p class="text-xs-center">
             <router-link :to="{name: 'login'}">
-              Need an account?
+              Have an account?
             </router-link>
           </p>
-          VALIDATION ERRORS
+
+          <validation-errors
+              v-if="errors"
+              :errors="errors"
+          />
+
           <form @submit.prevent="onSubmit">
             <fieldset class="form-group">
               <input
@@ -49,8 +54,13 @@
 </template>
 
 <script>
+import ValidationErrors from "../components/ValidationErrors";
+import {actionTypes} from "../store/modules/auth";
+import {mapState} from "vuex";
+
 export default {
   name: 'AppRegister',
+  components: {ValidationErrors},
   data() {
     return {
       email: '',
@@ -59,20 +69,18 @@ export default {
     }
   },
   computed: {
-    isSubmitting() {
-      return this.$store.state.auth.isSubmitting;
-    }
+    ...mapState({
+      isSubmitting: state => state.auth.isSubmitting,
+      errors: state => state.auth.errors,
+    }),
   },
   methods: {
     onSubmit() {
-      this.$store.dispatch('register', {
+      this.$store.dispatch(actionTypes.register, {
         email: this.email,
         username: this.username,
         password: this.password,
-      }).then(user => {
-        console.log(user);
-        this.$router.push({name: 'home'});
-      });
+      }).then(user => user && this.$router.push({name: 'home'}));
     },
   }
 }
